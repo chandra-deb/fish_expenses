@@ -52,6 +52,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                               });
                               Navigator.pop(context);
                             }),
+                            onLongPress: () {},
                             child: Text(name),
                           ),
                         )
