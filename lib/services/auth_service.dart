@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'database.dart';
 
 class AuthService {
   final _auth = FirebaseAuth.instance;
@@ -17,7 +20,18 @@ class AuthService {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      await _auth.signInWithCredential(authCredential);
+      UserCredential credential =
+          await _auth.signInWithCredential(authCredential);
+      User? user = credential.user;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (!userDoc.exists) {
+          await DB().addUser(credential.user!.uid);
+        }
+      }
     } on FirebaseAuthException catch (e) {
       print(e.message);
     }
