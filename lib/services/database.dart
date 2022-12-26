@@ -69,8 +69,8 @@ class DB {
   Stream<List<Buyer>> get getBuyersStream {
     return _userRef.snapshots().map(
       (event) {
-        var rawData = event.get(_buyerNamesField) as List;
-        buyers = rawData.map((e) => Buyer.fromMap(e)).toList();
+        var rawBuyers = event.get(_buyerNamesField) as List;
+        buyers = rawBuyers.map((e) => Buyer.fromMap(e)).toList();
         return buyers;
       },
     );
@@ -90,29 +90,23 @@ class DB {
     //   },
     // );
   }
-// This Method needs to be reimagined
-  // Future<void> addBuyer(Buyer buyer) async {
-  //   if (buyers.contains(buyer)) return;
-  //   buyers.add(buyer.toMap());
-  //   await _userRef.update({'buyers': buyers});
-  // }
 
-// This Method needs to be reimagined
+  Future<void> addBuyer(Buyer buyer) async {
+    if (buyers.contains(buyer)) return;
+    buyers.add(buyer);
+    final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
+    await _userRef.update({'buyers': updatedBuyers});
+  }
+
   Future<void> removeBuyer(Buyer buyer) async {
-    buyers = buyers.takeWhile(
-      (value) {
-        var p = value as Map;
-        if (p.containsValue(buyer.name)) return false;
-        return true;
+    buyers = buyers.where(
+      (byr) {
+        if (byr.name != buyer.name) return true;
+        return false;
       },
     ).toList();
-    // print(buyers);
-    await _userRef.update({_buyerNamesField: buyers});
-
-    // if (buyers.contains(buyer.toMap())) {
-    //   buyers.remove(buyer);
-    //   await _userRef.update({'buyers': buyers});
-    // }
+    final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
+    await _userRef.update({_buyerNamesField: updatedBuyers});
   }
   // Buyers
 
