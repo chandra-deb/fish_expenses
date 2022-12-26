@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../models/expense_model.dart';
-import '../../shared/modal_sheet.dart';
+import '../../shared/filtererModalSheet.dart';
 
 class ExpensesPageWrapper extends StatelessWidget {
   const ExpensesPageWrapper({super.key});
@@ -149,7 +149,10 @@ class _ExpensesPageState extends State<ExpensesPage> {
     final filterers = [
       TextButton(
         onPressed: () async {
-          var selectedNames = await modalDialogue(context: context);
+          var selectedNames = await FiltererModalSheet(
+            context: context,
+            namesFuture: DB().getExpenseNames,
+          ).showFiltererDialog();
           setState(() {
             selectedExpensesName = selectedNames;
           });
