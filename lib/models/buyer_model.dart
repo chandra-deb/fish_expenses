@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class Buyer {
   final String name;
   final int phone;
@@ -22,8 +21,13 @@ class Buyer {
     );
   }
 
-  String toJson() => json.encode(toMap());
+  @override
+  bool operator ==(covariant Buyer other) {
+    if (identical(this, other)) return true;
 
-  factory Buyer.fromJson(String source) =>
-      Buyer.fromMap(json.decode(source) as Map<String, dynamic>);
+    return other.name == name && other.phone == phone;
+  }
+
+  @override
+  int get hashCode => name.hashCode ^ phone.hashCode;
 }
