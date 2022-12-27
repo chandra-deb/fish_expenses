@@ -5,12 +5,14 @@ import 'package:uuid/uuid.dart';
 
 import '../models/buyer_model.dart';
 import '../models/expense_model.dart';
+import '../models/sell_model.dart';
 import 'auth_service.dart';
 
 const _usersCollectionName = 'users';
-const _expensesCollectionName = 'expenses';
-const _buyerNamesField = 'buyers';
+const _buyersField = 'buyers';
 const _fishNamesField = 'fishNames';
+const _sellsCollectionName = 'sells';
+const _expensesCollectionName = 'expenses';
 const _expenseNamesField = 'expenseNames';
 
 class DB {
@@ -21,10 +23,13 @@ class DB {
       .doc(AuthService().currentUser!.uid);
   late final _expensesCollectionRef =
       _userRef.collection(_expensesCollectionName);
+  late final _sellsCollectionRef = _userRef.collection(_sellsCollectionName);
 
   List<String> fishNames = [];
   List<Buyer> buyers = [];
+  List<String> buyerNames = [];
   List<Expense> expenses = [];
+  List<Sell> sells = [];
   List<String> expenseNames = [];
 
   DB._privateConstructor();
@@ -37,7 +42,7 @@ class DB {
   Future<void> addUser(String userUid) async {
     await _collectionRef
         .doc(userUid)
-        .set({_fishNamesField: [], _expenseNamesField: []});
+        .set({_fishNamesField: [], _expenseNamesField: [], _buyersField: []});
   }
 
 // FishNames
@@ -51,7 +56,15 @@ class DB {
     );
   }
 
+  Future<List<String>> get getFishNames async {
+    var rawData = await _userRef.get();
+    var rawFishNames = rawData.get(_fishNamesField) as List;
+    fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
+    return fishNames;
+  }
+
   Future<void> addFishName(String fishName) async {
+    fishNames = await getFishNames;
     if (fishNames.contains(fishName)) return;
     fishNames.add(fishName);
     await _userRef.update({_fishNamesField: fishNames});
@@ -69,16 +82,25 @@ class DB {
   Stream<List<Buyer>> get getBuyersStream {
     return _userRef.snapshots().map(
       (event) {
-        var rawBuyers = event.get(_buyerNamesField) as List;
+        var rawBuyers = event.get(_buyersField) as List;
         buyers = rawBuyers.map((e) => Buyer.fromMap(e)).toList();
         return buyers;
       },
     );
   }
 
+  Future<List<String>> get getBuyerNames async {
+    final rawData = await _userRef.get();
+    final rawBuyers = rawData.get(_buyersField) as List;
+    buyerNames = rawBuyers.map((buyer) => Buyer.fromMap(buyer).name).toList();
+    return buyerNames;
+
+    // return buyers.map((buyer) => buyer.name).toList();
+  }
+
   Future<List<Buyer>> get getBuyers async {
     var rd = await _userRef.get();
-    var rc = rd.get(_buyerNamesField) as List;
+    var rc = rd.get(_buyersField) as List;
     var kc = rc.map((e) => Buyer.fromMap(e)).toList();
     return kc;
 
@@ -95,7 +117,7 @@ class DB {
     if (buyers.contains(buyer)) return;
     buyers.add(buyer);
     final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
-    await _userRef.update({'buyers': updatedBuyers});
+    await _userRef.update({_buyersField: updatedBuyers});
   }
 
   Future<void> removeBuyer(Buyer buyer) async {
@@ -106,13 +128,48 @@ class DB {
       },
     ).toList();
     final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
-    await _userRef.update({_buyerNamesField: updatedBuyers});
+    await _userRef.update({_buyersField: updatedBuyers});
   }
   // Buyers
 
+// Sells Start
+  Stream<List<Sell>> get getSellsStream {
+    return _sellsCollectionRef.snapshots().map(
+      (element) {
+        sells = element.docs.map((e) {
+          return Sell.fromMap(e.data());
+        }).toList();
+        sells.sort((a, b) => b.date.compareTo(a.date));
+        return sells;
+      },
+    );
+  }
+
+  void addSell({
+    required String buyerName,
+    required String fishName,
+    required int quantity,
+    required int price,
+    required DateTime date,
+    required bool isSmallFish,
+  }) {
+    final sell = Sell(
+      id: const Uuid().v1(),
+      buyerName: buyerName,
+      fishName: fishName,
+      date: date,
+      price: price,
+      quantity: quantity,
+      smallFish: isSmallFish,
+    );
+    _sellsCollectionRef.doc(sell.id).set(sell.toMap());
+  }
+
+// Sells End
+
 // Expenses
   Stream<List<Expense>> get getExpensesStream {
-    return _userRef.collection(_expensesCollectionName).snapshots().map(
+    return _expensesCollectionRef.snapshots().map(
       (element) {
         expenses = element.docs.map((e) {
           return Expense.fromMap(e.data());
@@ -128,7 +185,7 @@ class DB {
     int price,
     int quantity,
   ) async {
-    var expense = Expense(
+    final expense = Expense(
       id: const Uuid().v1(),
       name: name,
       price: price,
