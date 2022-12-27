@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/sell_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/database.dart';
+import '../../shared/filtererModalSheet.dart';
 import 'add_sell_page.dart';
 
 class SellsPage extends StatelessWidget {
@@ -29,12 +30,18 @@ class SellsPage extends StatelessWidget {
       ),
       body: StreamBuilder<List<Sell>>(
         stream: DB().getSellsStream,
-        // initialData: InitialData,
         builder: (BuildContext context, AsyncSnapshot<List<Sell>> snapshot) {
-          // print(snapshot.data);
           if (snapshot.hasData) {
             return ListView(
               children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    await FiltererModalSheet(
+                            context: context, namesFuture: DB().getFishNames)
+                        .showFiltererDialog();
+                  },
+                  child: const Text('abc'),
+                ),
                 ...snapshot.data!.map((e) => Text(e.fishName.toString()))
               ],
             );
