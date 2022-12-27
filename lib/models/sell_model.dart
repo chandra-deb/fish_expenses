@@ -1,6 +1,9 @@
-import 'dart:convert';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Sell {
+  final String id;
   final String buyerName;
   final String fishName;
   final DateTime date;
@@ -8,6 +11,7 @@ class Sell {
   final int quantity;
   final bool smallFish;
   Sell({
+    required this.id,
     required this.buyerName,
     required this.fishName,
     required this.date,
@@ -18,9 +22,10 @@ class Sell {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'id': id,
       'buyerName': buyerName,
       'fishName': fishName,
-      'date': date.millisecondsSinceEpoch,
+      'date': date,
       'price': price,
       'quantity': quantity,
       'smallFish': smallFish,
@@ -28,18 +33,16 @@ class Sell {
   }
 
   factory Sell.fromMap(Map<String, dynamic> map) {
+    var timeStamp = map['date'] as Timestamp;
+
     return Sell(
+      id: map['id'] as String,
       buyerName: map['buyerName'] as String,
       fishName: map['fishName'] as String,
-      date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+      date: timeStamp.toDate(),
       price: map['price'] as int,
       quantity: map['quantity'] as int,
       smallFish: map['smallFish'] as bool,
     );
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory Sell.fromJson(String source) =>
-      Sell.fromMap(json.decode(source) as Map<String, dynamic>);
 }
