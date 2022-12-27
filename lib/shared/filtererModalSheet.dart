@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 class FiltererModalSheet {
   final Future<List<String>> namesFuture;
   final BuildContext context;
-  final List<String> _selectedNames = [];
+  final List<String> selectedNames;
 
   FiltererModalSheet({
     required this.context,
     required this.namesFuture,
+    required this.selectedNames,
   });
 
   ListView _namesListView(List<String> names, StateSetter setState) {
@@ -20,15 +21,15 @@ class FiltererModalSheet {
                 onPressed: () {
                   setState(
                     () {
-                      if (_selectedNames.contains(name)) {
-                        _selectedNames.remove(name);
+                      if (selectedNames.contains(name)) {
+                        selectedNames.remove(name);
                       } else {
-                        _selectedNames.add(name);
+                        selectedNames.add(name);
                       }
                     },
                   );
                 },
-                child: _selectedNames.contains(name)
+                child: selectedNames.contains(name)
                     ? Text(
                         name,
                         style: const TextStyle(color: Colors.redAccent),
@@ -66,6 +67,6 @@ class FiltererModalSheet {
               }
             });
       },
-    ).then((_) => _selectedNames);
+    ).then((_) => selectedNames);
   }
 }

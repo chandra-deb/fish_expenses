@@ -152,6 +152,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           var selectedNames = await FiltererModalSheet(
             context: context,
             namesFuture: DB().getExpenseNames,
+            selectedNames: selectedExpensesName,
           ).showFiltererDialog();
           setState(() {
             selectedExpensesName = selectedNames;
