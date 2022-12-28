@@ -39,7 +39,6 @@ class LoginPage extends StatelessWidget {
                 return ElevatedButton.icon(
                   onPressed: () async {
                     setState(() => signInLoading = true);
-
                     await authService.signInWithGoogle();
                     if (authService.currentUser == null) {
                       setState(() => signInLoading = false);
