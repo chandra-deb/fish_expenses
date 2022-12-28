@@ -153,7 +153,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
             context: context,
             namesFuture: DB().getExpenseNames,
             selectedNames: selectedExpensesName,
-          ).showFiltererDialog();
+          ).showFiltererSheet();
           setState(() {
             selectedExpensesName = selectedNames;
           });
