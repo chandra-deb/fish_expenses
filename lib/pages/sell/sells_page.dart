@@ -8,6 +8,11 @@ import '../../shared/date_range_picker.dart';
 import '../../shared/filtererModalSheet.dart';
 import 'add_sell_page.dart';
 
+enum NameOf {
+  buyer,
+  fish;
+}
+
 class SellsPageWrapper extends StatelessWidget {
   static const String routeName = '/sellsPage';
 
@@ -63,7 +68,7 @@ class SellsPage extends StatefulWidget {
 
 class _SellsPageState extends State<SellsPage> {
   List<String> _selectedBuyerNames = [];
-  final List<String> _selectedFishNames = [];
+  List<String> _selectedFishNames = [];
 
   DateTimeRange? selectedDateRange;
   DateTimeRange? defaultDateRange = DateTimeRange(
@@ -74,14 +79,21 @@ class _SellsPageState extends State<SellsPage> {
 
   List<Sell> filterSellsByNames({
     required List<String> selectedNames,
+    required NameOf filterer,
     bool reloadIfEmpty = true,
   }) {
     if (selectedNames.isNotEmpty) {
       List<Sell> sls = [];
       for (var name in selectedNames) {
         for (var sell in widget.sells) {
-          if (sell.buyerName == name) {
-            sls.add(sell);
+          if (filterer == NameOf.buyer) {
+            if (sell.buyerName == name) {
+              sls.add(sell);
+            }
+          } else if (filterer == NameOf.fish) {
+            if (sell.fishName == name) {
+              sls.add(sell);
+            }
           }
         }
       }
@@ -134,10 +146,18 @@ class _SellsPageState extends State<SellsPage> {
     }
   }
 
+// List<Sell> filterByFishSize (){
+
+// }
+
   List<Sell> filteredSells() {
     // filterSellsByBuyerNames();
-    filterSellsByNames(selectedNames: _selectedBuyerNames);
-    filterSellsByNames(selectedNames: _selectedFishNames, reloadIfEmpty: false);
+    filterSellsByNames(
+        selectedNames: _selectedBuyerNames, filterer: NameOf.buyer);
+    filterSellsByNames(
+        selectedNames: _selectedFishNames,
+        filterer: NameOf.fish,
+        reloadIfEmpty: false);
     return filterByDateRange();
   }
 
@@ -157,9 +177,10 @@ class _SellsPageState extends State<SellsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('${sell.buyerName} Name'),
-                Text('${sell.price} Taka'),
-                Text('${sell.quantity} kg'),
+                Text(sell.buyerName),
+                Text(sell.fishName),
+                // Text('${sell.quantity} kg'),
+                Text(sell.date.toString().split(' ')[0])
               ],
             ),
           ),
@@ -170,6 +191,7 @@ class _SellsPageState extends State<SellsPage> {
 
   List<Widget> sellFiltererWidgets() {
     final filterers = [
+      const Text('Filter By'),
       TextButton(
         onPressed: () async {
           var selectedNames = await FiltererModalSheet(
@@ -181,7 +203,20 @@ class _SellsPageState extends State<SellsPage> {
             _selectedBuyerNames = selectedNames;
           });
         },
-        child: const Text('Filter By Buyer'),
+        child: const Text('Buyer'),
+      ),
+      TextButton(
+        onPressed: () async {
+          var selectedNames = await FiltererModalSheet(
+            context: context,
+            namesFuture: DB().getFishNames,
+            selectedNames: _selectedFishNames,
+          ).showFiltererSheet();
+          setState(() {
+            _selectedFishNames = selectedNames;
+          });
+        },
+        child: const Text('Fish'),
       ),
       TextButton(
         onPressed: () async {
@@ -193,7 +228,7 @@ class _SellsPageState extends State<SellsPage> {
             });
           }
         },
-        child: const Text('Filter By DateRange'),
+        child: const Text('DateRange'),
       ),
     ];
 
