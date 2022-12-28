@@ -62,7 +62,9 @@ class SellsPage extends StatefulWidget {
 }
 
 class _SellsPageState extends State<SellsPage> {
-  List<String> selectedBuyerNames = [];
+  List<String> _selectedBuyerNames = [];
+  final List<String> _selectedFishNames = [];
+
   DateTimeRange? selectedDateRange;
   DateTimeRange? defaultDateRange = DateTimeRange(
     start: DateTime.now().subtract(const Duration(days: 30)),
@@ -70,10 +72,13 @@ class _SellsPageState extends State<SellsPage> {
   );
   List<Sell> sells = [];
 
-  List<Sell> filterSellsByBuyerNames() {
-    if (selectedBuyerNames.isNotEmpty) {
+  List<Sell> filterSellsByNames({
+    required List<String> selectedNames,
+    bool reloadIfEmpty = true,
+  }) {
+    if (selectedNames.isNotEmpty) {
       List<Sell> sls = [];
-      for (var name in selectedBuyerNames) {
+      for (var name in selectedNames) {
         for (var sell in widget.sells) {
           if (sell.buyerName == name) {
             sls.add(sell);
@@ -81,12 +86,29 @@ class _SellsPageState extends State<SellsPage> {
         }
       }
       sells = sls;
-      return sells;
-    } else {
+    } else if (reloadIfEmpty == true) {
       sells = widget.sells;
-      return sells;
     }
+    return sells;
   }
+
+  // List<Sell> filterSellsByBuyerNames() {
+  //   if (_selectedBuyerNames.isNotEmpty) {
+  //     List<Sell> sls = [];
+  //     for (var name in _selectedBuyerNames) {
+  //       for (var sell in widget.sells) {
+  //         if (sell.buyerName == name) {
+  //           sls.add(sell);
+  //         }
+  //       }
+  //     }
+  //     sells = sls;
+  //     return sells;
+  //   } else {
+  //     sells = widget.sells;
+  //     return sells;
+  //   }
+  // }
 
   List<Sell> filterByDateRange() {
     if (selectedDateRange != null) {
@@ -113,7 +135,9 @@ class _SellsPageState extends State<SellsPage> {
   }
 
   List<Sell> filteredSells() {
-    filterSellsByBuyerNames();
+    // filterSellsByBuyerNames();
+    filterSellsByNames(selectedNames: _selectedBuyerNames);
+    filterSellsByNames(selectedNames: _selectedFishNames, reloadIfEmpty: false);
     return filterByDateRange();
   }
 
@@ -151,10 +175,10 @@ class _SellsPageState extends State<SellsPage> {
           var selectedNames = await FiltererModalSheet(
             context: context,
             namesFuture: DB().getBuyerNames,
-            selectedNames: selectedBuyerNames,
+            selectedNames: _selectedBuyerNames,
           ).showFiltererSheet();
           setState(() {
-            selectedBuyerNames = selectedNames;
+            _selectedBuyerNames = selectedNames;
           });
         },
         child: const Text('Filter By Buyer'),
