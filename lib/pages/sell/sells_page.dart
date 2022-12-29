@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../extensions/string_capitalize.dart';
 import '../../models/sell_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/database.dart';
@@ -11,6 +12,12 @@ import 'add_sell_page.dart';
 enum NameOf {
   buyer,
   fish;
+}
+
+enum FishSize {
+  all,
+  small,
+  large;
 }
 
 class SellsPageWrapper extends StatelessWidget {
@@ -146,9 +153,24 @@ class _SellsPageState extends State<SellsPage> {
     }
   }
 
-// List<Sell> filterByFishSize (){
+  FishSize _selectedFishSize = FishSize.all;
+  List<bool> _selectedFishSizeInBoolList = <bool>[true, false, false];
+  final List<Widget> fishSizes = <Widget>[
+    Text(FishSize.all.name.toCapitalize()),
+    Text(FishSize.large.name.toCapitalize()),
+    Text(FishSize.small.name.toCapitalize()),
+  ];
 
-// }
+  List<Sell> filterSellsByFishSize() {
+    if (_selectedFishSize == FishSize.large) {
+      sells = sells.where((sell) => sell.smallFish == false).toList();
+      return sells;
+    } else if (_selectedFishSize == FishSize.small) {
+      sells = sells.where((sell) => sell.smallFish == true).toList();
+      return sells;
+    }
+    return sells;
+  }
 
   List<Sell> filteredSells() {
     // filterSellsByBuyerNames();
@@ -158,6 +180,7 @@ class _SellsPageState extends State<SellsPage> {
         selectedNames: _selectedFishNames,
         filterer: NameOf.fish,
         reloadIfEmpty: false);
+    filterSellsByFishSize();
     return filterByDateRange();
   }
 
@@ -180,7 +203,8 @@ class _SellsPageState extends State<SellsPage> {
                 Text(sell.buyerName),
                 Text(sell.fishName),
                 // Text('${sell.quantity} kg'),
-                Text(sell.date.toString().split(' ')[0])
+                Text(sell.date.toString().split(' ')[0]),
+                Text(sell.smallFish == true ? 'Small' : 'Large'),
               ],
             ),
           ),
@@ -250,6 +274,36 @@ class _SellsPageState extends State<SellsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [...sellFiltererWidgets()],
                   ),
+                ),
+                ToggleButtons(
+                  direction: Axis.horizontal,
+                  onPressed: (int index) {
+                    setState(() {
+                      if (index == 0) {
+                        _selectedFishSize = FishSize.all;
+                        _selectedFishSizeInBoolList = [true, false, false];
+                      } else if (index == 1) {
+                        _selectedFishSize = FishSize.large;
+
+                        _selectedFishSizeInBoolList = [false, true, false];
+                      } else {
+                        _selectedFishSize = FishSize.small;
+
+                        _selectedFishSizeInBoolList = [false, false, true];
+                      }
+                    });
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  selectedBorderColor: Colors.red[700],
+                  selectedColor: Colors.white,
+                  fillColor: Colors.red[200],
+                  color: Colors.red[400],
+                  constraints: const BoxConstraints(
+                    minHeight: 40.0,
+                    minWidth: 80.0,
+                  ),
+                  isSelected: _selectedFishSizeInBoolList,
+                  children: fishSizes,
                 ),
                 ...sellListWidgets(),
               ],
