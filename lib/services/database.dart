@@ -31,6 +31,7 @@ class DB {
   List<Expense> expenses = [];
   List<Sell> sells = [];
   List<String> expenseNames = [];
+  DocumentSnapshot<Object?>? userData;
 
   DB._privateConstructor();
   static final DB _db = DB._privateConstructor();
@@ -45,22 +46,34 @@ class DB {
         .set({_fishNamesField: [], _expenseNamesField: [], _buyersField: []});
   }
 
-// FishNames
-  Stream<List<String>> get getFishNamesStream {
-    return _userRef.snapshots().map(
-      (event) {
-        var rawData = event.get(_fishNamesField) as List;
-        fishNames = rawData.map((e) => e.toString()).toList();
-        return fishNames;
-      },
-    );
+  Future<DocumentSnapshot<Object?>> refreshUserData() async {
+    userData = await _userRef.get();
+    return userData!;
   }
 
+// FishNames
+  // Stream<List<String>> get getFishNamesStream {
+  //   return _userRef.snapshots().map(
+  //     (event) {
+  //       var rawData = event.get(_fishNamesField) as List;
+  //       fishNames = rawData.map((e) => e.toString()).toList();
+  //       return fishNames;
+  //     },
+  //   );
+  // }
+
   Future<List<String>> get getFishNames async {
-    var rawData = await _userRef.get();
-    var rawFishNames = rawData.get(_fishNamesField) as List;
+    if (userData == null) {
+      await refreshUserData();
+    }
+
+    var rawFishNames = userData!.get(_fishNamesField) as List;
     fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
     return fishNames;
+    // var rawData = await _userRef.get();
+    // var rawFishNames = rawData.get(_fishNamesField) as List;
+    // fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
+    // return fishNames;
   }
 
   Future<void> addFishName(String fishName) async {
@@ -68,12 +81,14 @@ class DB {
     if (fishNames.contains(fishName)) return;
     fishNames.add(fishName);
     await _userRef.update({_fishNamesField: fishNames});
+    await refreshUserData();
   }
 
   Future<void> removeFishName(String fishName) async {
     if (fishNames.contains(fishName)) {
       fishNames.remove(fishName);
       await _userRef.update({_fishNamesField: fishNames});
+      await refreshUserData();
     }
   }
 // FishNames
@@ -90,34 +105,28 @@ class DB {
   }
 
   Future<List<String>> get getBuyerNames async {
-    final rawData = await _userRef.get();
-    final rawBuyers = rawData.get(_buyersField) as List;
+    if (userData == null) {
+      await refreshUserData();
+    }
+
+    final rawBuyers = userData!.get(_buyersField) as List;
     buyerNames = rawBuyers.map((buyer) => Buyer.fromMap(buyer).name).toList();
     return buyerNames;
-
-    // return buyers.map((buyer) => buyer.name).toList();
   }
 
-  Future<List<Buyer>> get getBuyers async {
-    var rd = await _userRef.get();
-    var rc = rd.get(_buyersField) as List;
-    var kc = rc.map((e) => Buyer.fromMap(e)).toList();
-    return kc;
-
-    // userRef.snapshots().map(
-    //   (event) {
-    //     var rawData = event.get('buyers') as List;
-    //     buyers = rawData.map((e) => Buyer.fromMap(e)).toList();
-    //     return buyers;
-    //   },
-    // );
-  }
+  // Future<List<Buyer>> get getBuyers async {
+  //   var rd = await _userRef.get();
+  //   var rc = rd.get(_buyersField) as List;
+  //   var kc = rc.map((e) => Buyer.fromMap(e)).toList();
+  //   return kc;
+  // }
 
   Future<void> addBuyer(Buyer buyer) async {
     if (buyers.contains(buyer)) return;
     buyers.add(buyer);
     final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
     await _userRef.update({_buyersField: updatedBuyers});
+    await refreshUserData();
   }
 
   Future<void> removeBuyer(Buyer buyer) async {
@@ -129,6 +138,7 @@ class DB {
     ).toList();
     final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
     await _userRef.update({_buyersField: updatedBuyers});
+    await refreshUserData();
   }
   // Buyers
 
@@ -214,8 +224,11 @@ class DB {
 
 // ExpenseNames
   Future<List<String>> get getExpenseNames async {
-    var data = await _userRef.get();
-    var names = data.get(_expenseNamesField) as List;
+    if (userData == null) {
+      await refreshUserData();
+    }
+
+    var names = userData!.get(_expenseNamesField) as List;
     var expenseNames = names.map((e) => e as String).toList();
     return expenseNames;
   }
@@ -225,12 +238,14 @@ class DB {
     if (expenseNames.contains(expenseName)) return;
     expenseNames.add(expenseName);
     await _userRef.update({_expenseNamesField: expenseNames});
+    await refreshUserData();
   }
 
   Future<void> removeExpenseName(String expenseName) async {
     if (expenseNames.contains(expenseName)) {
       expenseNames.remove(expenseName);
       await _userRef.update({_expenseNamesField: expenseNames});
+      await refreshUserData();
     }
   }
 // ExpenseNames
