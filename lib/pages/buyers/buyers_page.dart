@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../models/buyer_model.dart';
@@ -32,11 +33,20 @@ class BuyersPage extends StatelessWidget {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             return ListView(
               children: [
-                ...snapshot.data!.map((buyer) => TextButton(
-                    onPressed: () {
-                      db.removeBuyer(buyer);
-                    },
-                    child: Text(buyer.name))),
+                ...snapshot.data!.map((buyer) => Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      color: Colors.lightBlue,
+                      child: ListTile(
+                        hoverColor: Colors.red,
+                        title: Text(buyer.name),
+                        subtitle: Text(buyer.phone.toString()),
+                        trailing: IconButton(
+                            onPressed: () {
+                              FlutterPhoneDirectCaller.callNumber(buyer.phone);
+                            },
+                            icon: const Icon(Icons.phone)),
+                      ),
+                    )),
               ],
             );
           }

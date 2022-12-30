@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class Buyer {
   final String name;
-  final int phone;
+  final String phone;
   Buyer({
     required this.name,
     required this.phone,
@@ -17,7 +19,7 @@ class Buyer {
   factory Buyer.fromMap(Map<String, dynamic> map) {
     return Buyer(
       name: map['name'] as String,
-      phone: map['phone'] as int,
+      phone: map['phone'] as String,
     );
   }
 
@@ -30,4 +32,9 @@ class Buyer {
 
   @override
   int get hashCode => name.hashCode ^ phone.hashCode;
+
+  String toJson() => json.encode(toMap());
+
+  factory Buyer.fromJson(String source) =>
+      Buyer.fromMap(json.decode(source) as Map<String, dynamic>);
 }
