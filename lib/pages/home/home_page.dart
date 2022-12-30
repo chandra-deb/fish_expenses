@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../services/auth_service.dart';
+import '../buyers/buyers_page.dart';
 import '../expense/expenses_page.dart';
 import '../login/login_page.dart';
 import '../sell/sells_page.dart';
@@ -18,15 +19,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     SellsPageWrapper(),
     ExpensesPageWrapper(),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
+    BuyersPage(),
   ];
 
   void _onItemTapped(int index) {
