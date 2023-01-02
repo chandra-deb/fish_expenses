@@ -12,6 +12,7 @@ class AddSellPage extends StatefulWidget {
 }
 
 class _AddSellPageState extends State<AddSellPage> {
+  final _newBuyerNameController = TextEditingController();
   final _newFishNameController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -27,6 +28,7 @@ class _AddSellPageState extends State<AddSellPage> {
 
   @override
   void dispose() {
+    _newBuyerNameController.dispose();
     _newFishNameController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
@@ -57,6 +59,39 @@ class _AddSellPageState extends State<AddSellPage> {
                               });
                               Navigator.pop(context);
                             }),
+                            onLongPress: () {
+                              showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  String enteredPassword = '';
+                                  return Dialog(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        const Text(
+                                            'Enter Master Password to delete!'),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              enteredPassword = value.trim(),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            if (enteredPassword ==
+                                                DB().masterPassword) {
+                                              DB().removeBuyerName(name);
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                          child: const Text('Confirm'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                             child: Text(name),
                           ),
                         )
@@ -129,17 +164,63 @@ class _AddSellPageState extends State<AddSellPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  showBuyerNamesToSelectOne();
-                },
-                child: _selectedBuyerName.isNotEmpty
-                    ? Text(_selectedBuyerName)
-                    : Text(
-                        _buyerNameError.isEmpty
-                            ? 'Select A Buyer'
-                            : _buyerNameError,
-                      ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     showBuyerNamesToSelectOne();
+              //   },
+              //   child: _selectedBuyerName.isNotEmpty
+              //       ? Text(_selectedBuyerName)
+              //       : Text(
+              //           _buyerNameError.isEmpty
+              //               ? 'Select A Buyer'
+              //               : _buyerNameError,
+              //         ),
+              // ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      showBuyerNamesToSelectOne();
+                    },
+                    child: _selectedBuyerName.isNotEmpty
+                        ? Text(_selectedBuyerName)
+                        : Text(
+                            _buyerNameError.isEmpty
+                                ? 'Select A Buyer Name'
+                                : _buyerNameError,
+                          ),
+                  ),
+                  const Text('or'),
+                  Expanded(
+                    child: TextField(
+                      keyboardType: TextInputType.name,
+                      controller: _newBuyerNameController,
+                      decoration: InputDecoration(
+                          labelText: 'New Name',
+                          errorText: _buyerNameError.isNotEmpty
+                              ? _buyerNameError
+                              : null),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: (() async {
+                        final newBuyerName =
+                            _newBuyerNameController.text.trim();
+                        if (newBuyerName.isNotEmpty) {
+                          setState(() {
+                            _selectedBuyerName = newBuyerName;
+                            _newBuyerNameController.clear();
+                            _buyerNameError = '';
+                          });
+                          await DB().addBuyerName(newBuyerName);
+                        } else {
+                          setState(() {
+                            _buyerNameError = 'Please Select a Buyer';
+                          });
+                        }
+                      }),
+                      child: const Text('Add'))
+                ],
               ),
               Row(
                 children: [
@@ -186,6 +267,7 @@ class _AddSellPageState extends State<AddSellPage> {
                       child: const Text('Add'))
                 ],
               ),
+
               TextField(
                 decoration: InputDecoration(
                     labelText: 'Price',
@@ -290,12 +372,12 @@ class _AddSellPageState extends State<AddSellPage> {
                     );
 
                     Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const HomePage(selectedIndex: 0),
-                        ),
-                        (route) => false);
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomePage(selectedIndex: 0),
+                      ),
+                      (route) => false,
+                    );
                   }
                 },
                 child: const Text('Add Sell'),
