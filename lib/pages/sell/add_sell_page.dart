@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/database.dart';
+import '../../shared/name_delete_confirmation.dart';
 import '../home/home_page.dart';
 
 class AddSellPage extends StatefulWidget {
@@ -60,36 +61,10 @@ class _AddSellPageState extends State<AddSellPage> {
                               Navigator.pop(context);
                             }),
                             onLongPress: () {
-                              showDialog<String>(
+                              showNameDeleteConfirmationDialog(
                                 context: context,
-                                builder: (BuildContext context) {
-                                  String enteredPassword = '';
-                                  return Dialog(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        const Text(
-                                            'Enter Master Password to delete!'),
-                                        TextField(
-                                          onChanged: (value) =>
-                                              enteredPassword = value.trim(),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            if (enteredPassword ==
-                                                DB().masterPassword) {
-                                              DB().removeBuyerName(name);
-                                              Navigator.pop(context);
-                                            }
-                                          },
-                                          child: const Text('Confirm'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                name: name,
+                                nameRemoverFunc: DB().removeBuyerName,
                               );
                             },
                             child: Text(name),
@@ -135,6 +110,12 @@ class _AddSellPageState extends State<AddSellPage> {
                               });
                               Navigator.pop(context);
                             }),
+                            onLongPress: () {
+                              showNameDeleteConfirmationDialog(
+                                  context: context,
+                                  name: name,
+                                  nameRemoverFunc: DB().removeFishName);
+                            },
                             child: Text(name),
                           ),
                         )
