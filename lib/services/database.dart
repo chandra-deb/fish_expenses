@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/expense_model.dart';
 import '../models/sell_model.dart';
+import '../models/user_data_model.dart';
 import 'auth_service.dart';
 
 const _usersCollectionName = 'users';
@@ -24,18 +25,20 @@ class DB {
       _userRef.collection(_expensesCollectionName);
   late final _sellsCollectionRef = _userRef.collection(_sellsCollectionName);
 
-// UserData _userData = UserData(fishNames: fishNames, expenseNames: expenseNames)
-
-  List<String> fishNames = [];
-  List<String> buyerNames = [];
   List<Expense> expenses = [];
   List<Sell> sells = [];
-  List<String> expenseNames = [];
 
   bool sellsDataChanged = true;
   bool expensesDataChanged = true;
   bool fishNamesDataChanged = true;
   bool buyerNamesDataChanged = true;
+  bool userDataChanged = true;
+
+  UserData userData = UserData(
+    fishNames: [],
+    expenseNames: [],
+    buyerNames: [],
+  );
 
   DB._privateConstructor();
   static final DB _db = DB._privateConstructor();
@@ -49,31 +52,47 @@ class DB {
         {_fishNamesField: [], _expenseNamesField: [], _buyerNamesField: []});
   }
 
+  Future<UserData> getUserData() async {
+    var rawData = await _userRef.get().then((value) => value.data() as Map);
+    userData = UserData.fromMap(rawData);
+    return userData;
+    // fishNames = rawData[_fishNamesField];
+    // buyerNames = rawData[_fishNamesField];
+    // expenseNames = rawData[_expenseNamesField];
+
+    // userData = userData.copyWith(
+    //   expenseNames: expenseNames,
+    //   fishNames: fishNames,
+    // );
+  }
+
 // FishNames
 
   Future<List<String>> get getFishNames async {
-    if (fishNamesDataChanged) {
-      var rawData = await _userRef.get();
-      var rawFishNames = rawData.get(_fishNamesField) as List;
-      fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
-      fishNamesDataChanged = false;
+    if (userDataChanged) {
+      await getUserData();
+      userDataChanged = false;
     }
-    return fishNames;
+
+    return userData.fishNames;
   }
 
   Future<void> addFishName(String fishName) async {
-    fishNames = await getFishNames;
+    var fishNames = await getFishNames;
     if (fishNames.contains(fishName)) return;
     fishNames.add(fishName);
-    fishNamesDataChanged = true;
-    await _userRef.update({_fishNamesField: fishNames});
+    userData = userData.copyWith(fishNames: fishNames);
+    userDataChanged = true;
+    await _userRef.update({_fishNamesField: userData.fishNames});
   }
 
   Future<void> removeFishName(String fishName) async {
+    var fishNames = await getFishNames;
     if (fishNames.contains(fishName)) {
       fishNames.remove(fishName);
-      fishNamesDataChanged = true;
-      await _userRef.update({_fishNamesField: fishNames});
+      userData = userData.copyWith(fishNames: fishNames);
+      userDataChanged = true;
+      await _userRef.update({_fishNamesField: userData.fishNames});
     }
   }
 // FishNames
@@ -81,13 +100,11 @@ class DB {
 // Buyers
 
   Future<List<String>> get getBuyerNames async {
-    if (buyerNamesDataChanged) {
-      final rawData = await _userRef.get();
-      final rawBuyers = rawData.get(_buyerNamesField) as List;
-      buyerNames = rawBuyers.map((buyerName) => buyerName.toString()).toList();
-      buyerNamesDataChanged = false;
+    if (userDataChanged) {
+      await getUserData();
+      userDataChanged = false;
     }
-    return buyerNames;
+    return userData.buyerNames;
   }
 
   Future<void> addBuyerName(String buyerName) async {
@@ -95,15 +112,18 @@ class DB {
 
     if (buyerNames.contains(buyerName)) return;
     buyerNames.add(buyerName);
-    buyerNamesDataChanged = true;
-    await _userRef.update({_buyerNamesField: buyerNames});
+    userData = userData.copyWith(buyerNames: buyerNames);
+    userDataChanged = true;
+    await _userRef.update({_buyerNamesField: userData.buyerNames});
   }
 
   Future<void> removeBuyerName(String buyerName) async {
+    final buyerNames = await getBuyerNames;
     if (buyerNames.contains(buyerName)) {
       buyerNames.remove(buyerName);
-      buyerNamesDataChanged = true;
-      await _userRef.update({_buyerNamesField: buyerNames});
+      userData = userData.copyWith(buyerNames: buyerNames);
+      userDataChanged = true;
+      await _userRef.update({_buyerNamesField: userData.buyerNames});
     }
   }
 
@@ -189,23 +209,30 @@ class DB {
 
 // ExpenseNames
   Future<List<String>> get getExpenseNames async {
-    var data = await _userRef.get();
-    var names = data.get(_expenseNamesField) as List;
-    var expenseNames = names.map((e) => e as String).toList();
-    return expenseNames;
+    if (userDataChanged) {
+      await getUserData();
+      userDataChanged = false;
+    }
+
+    return userData.expenseNames;
   }
 
   Future<void> addExpenseName(String expenseName) async {
-    expenseNames = await getExpenseNames;
+    final expenseNames = await getExpenseNames;
     if (expenseNames.contains(expenseName)) return;
     expenseNames.add(expenseName);
-    await _userRef.update({_expenseNamesField: expenseNames});
+    userData = userData.copyWith(expenseNames: expenseNames);
+    userDataChanged = true;
+    await _userRef.update({_expenseNamesField: userData.expenseNames});
   }
 
   Future<void> removeExpenseName(String expenseName) async {
+    final expenseNames = await getExpenseNames;
     if (expenseNames.contains(expenseName)) {
       expenseNames.remove(expenseName);
-      await _userRef.update({_expenseNamesField: expenseNames});
+      userData = userData.copyWith(expenseNames: expenseNames);
+      userDataChanged = true;
+      await _userRef.update({_expenseNamesField: userData.expenseNames});
     }
   }
 // ExpenseNames
