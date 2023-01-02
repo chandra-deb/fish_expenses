@@ -31,6 +31,7 @@ class DB {
   List<Expense> expenses = [];
   List<Sell> sells = [];
   List<String> expenseNames = [];
+  bool dataChanged = true;
 
   DB._privateConstructor();
   static final DB _db = DB._privateConstructor();
@@ -132,27 +133,48 @@ class DB {
   }
   // Buyers
 
+  var sellStream = StreamController<List<Sell>>();
+
 // Sells Start
-  Stream<List<Sell>> get getSellsStream {
-    return _sellsCollectionRef.snapshots().map(
-      (element) {
-        sells = element.docs.map((e) {
-          return Sell.fromMap(e.data());
-        }).toList();
-        sells.sort((a, b) => b.date.compareTo(a.date));
-        return sells;
-      },
-    );
+  Future<List<Sell>> get getSells async {
+    if (dataChanged) {
+      var snap = await _sellsCollectionRef.get();
+      sells = snap.docs.map((e) {
+        return Sell.fromMap(e.data());
+      }).toList();
+
+      sells.sort((a, b) => b.date.compareTo(a.date));
+      dataChanged = false;
+    }
+    return sells;
+
+    // if (dataChanged) {
+    //   return _sellsCollectionRef.snapshots().map(
+    //     (element) {
+    //       sells = element.docs.map((e) {
+    //         return Sell.fromMap(e.data());
+    //       }).toList();
+    //       sells.sort((a, b) => b.date.compareTo(a.date));
+    //       sellStream.sink.add(sells);
+    //       // return sellStream.stream.asBroadcastStream();
+
+    //       // return sells;
+    //     },
+    //   );
+    // } else {
+    //   sellStream.sink.add(sells);
+    // }
+    // return sellStream.stream;
   }
 
-  void addSell({
+  Future<void> addSell({
     required String buyerName,
     required String fishName,
     required int quantity,
     required int price,
     required DateTime date,
     required bool isSmallFish,
-  }) {
+  }) async {
     final sell = Sell(
       id: const Uuid().v1(),
       buyerName: buyerName,
@@ -162,7 +184,8 @@ class DB {
       quantity: quantity,
       smallFish: isSmallFish,
     );
-    _sellsCollectionRef.doc(sell.id).set(sell.toMap());
+    dataChanged = true;
+    await _sellsCollectionRef.doc(sell.id).set(sell.toMap());
   }
 
 // Sells End

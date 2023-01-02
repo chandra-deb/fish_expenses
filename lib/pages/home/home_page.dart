@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,16 +10,21 @@ import '../login/login_page.dart';
 import '../sell/sells_page.dart';
 
 class HomePage extends StatefulWidget {
-  static const String routeName = '/';
+  final String routeName = '/';
+  final int selectedIndex;
 
-  const HomePage({super.key});
+  const HomePage({
+    Key? key,
+    required this.selectedIndex,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.selectedIndex;
+
   static const List<Widget> _widgetOptions = <Widget>[
     SellsPageWrapper(),
     ExpensesPageWrapper(),

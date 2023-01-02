@@ -6,7 +6,7 @@ import '../../models/sell_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/database.dart';
 import '../../shared/date_range_picker.dart';
-import '../../shared/filtererModalSheet.dart';
+import '../../shared/filterer_modal_Sheet.dart';
 import 'add_sell_page.dart';
 
 enum NameOf {
@@ -42,8 +42,8 @@ class SellsPageWrapper extends StatelessWidget {
         ],
         title: const Text('Sells Page'),
       ),
-      body: StreamBuilder<List<Sell>>(
-        stream: db.getSellsStream,
+      body: FutureBuilder<List<Sell>>(
+        future: db.getSells,
         builder: (BuildContext context, AsyncSnapshot<List<Sell>> snapshot) {
           if (snapshot.hasData) {
             List<Sell> sells = snapshot.data!;
@@ -192,20 +192,33 @@ class _SellsPageState extends State<SellsPage> {
     return allPrice;
   }
 
+  int sellAddAllQuantity() {
+    int allQuantity = 0;
+    for (var sell in sells) {
+      allQuantity += sell.quantity;
+    }
+    return allQuantity;
+  }
+
   List<Widget> sellListWidgets() {
     final sells = filteredSells()
         .map(
-          (sell) => TextButton(
-            onPressed: () async {},
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(sell.buyerName),
-                Text(sell.fishName),
-                // Text('${sell.quantity} kg'),
-                Text(sell.date.toString().split(' ')[0]),
-                Text(sell.smallFish == true ? 'Small' : 'Large'),
-              ],
+          (sell) => Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            color: Colors.green.shade100,
+            child: TextButton(
+              onPressed: () async {},
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(sell.buyerName),
+                  Text(sell.fishName),
+                  Text('${sell.quantity} Kg'),
+                  Text('${sell.price} Tk'),
+                  Text(sell.date.toString().split(' ')[0]),
+                  Text(sell.smallFish == true ? 'Small' : 'Large'),
+                ],
+              ),
             ),
           ),
         )
@@ -275,45 +288,54 @@ class _SellsPageState extends State<SellsPage> {
                     children: [...sellFiltererWidgets()],
                   ),
                 ),
-                ToggleButtons(
-                  direction: Axis.horizontal,
-                  onPressed: (int index) {
-                    setState(() {
-                      if (index == 0) {
-                        _selectedFishSize = FishSize.all;
-                        _selectedFishSizeInBoolList = [true, false, false];
-                      } else if (index == 1) {
-                        _selectedFishSize = FishSize.large;
+                Row(
+                  children: [
+                    const Text('Fish Size :'),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    ToggleButtons(
+                      direction: Axis.horizontal,
+                      onPressed: (int index) {
+                        setState(() {
+                          if (index == 0) {
+                            _selectedFishSize = FishSize.all;
+                            _selectedFishSizeInBoolList = [true, false, false];
+                          } else if (index == 1) {
+                            _selectedFishSize = FishSize.large;
 
-                        _selectedFishSizeInBoolList = [false, true, false];
-                      } else {
-                        _selectedFishSize = FishSize.small;
+                            _selectedFishSizeInBoolList = [false, true, false];
+                          } else {
+                            _selectedFishSize = FishSize.small;
 
-                        _selectedFishSizeInBoolList = [false, false, true];
-                      }
-                    });
-                  },
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  selectedBorderColor: Colors.red[700],
-                  selectedColor: Colors.white,
-                  fillColor: Colors.red[200],
-                  color: Colors.red[400],
-                  constraints: const BoxConstraints(
-                    minHeight: 40.0,
-                    minWidth: 80.0,
-                  ),
-                  isSelected: _selectedFishSizeInBoolList,
-                  children: fishSizes,
+                            _selectedFishSizeInBoolList = [false, false, true];
+                          }
+                        });
+                      },
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      selectedBorderColor: Colors.red[700],
+                      selectedColor: Colors.white,
+                      fillColor: Colors.red[200],
+                      color: Colors.red[400],
+                      constraints: const BoxConstraints(
+                        minHeight: 40.0,
+                        minWidth: 80.0,
+                      ),
+                      isSelected: _selectedFishSizeInBoolList,
+                      children: fishSizes,
+                    ),
+                  ],
                 ),
                 ...sellListWidgets(),
               ],
             ),
           ),
-          Text('All Price ${sellAddAllPrice()} taka')
+          Text('Price ${sellAddAllPrice()} taka'),
+          Text('Quantity ${sellAddAllQuantity()} kg'),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
+        onPressed: () {
           Navigator.pushNamed(context, AddSellPage.routeName);
         },
         child: const Icon(

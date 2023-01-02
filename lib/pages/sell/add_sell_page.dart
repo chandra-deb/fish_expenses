@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/database.dart';
+import '../home/home_page.dart';
 
 class AddSellPage extends StatefulWidget {
   static const String routeName = '/addSellPage';
@@ -227,14 +228,13 @@ class _AddSellPageState extends State<AddSellPage> {
                     onChanged: (value) {
                       setState(() {
                         _isSmallFish = value!;
-                        print(_isSmallFish);
                       });
                     },
                   ),
                 ],
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_selectedBuyerName.isEmpty) {
                     setState(() {
                       _buyerNameError = 'Please Select a buyer';
@@ -253,6 +253,7 @@ class _AddSellPageState extends State<AddSellPage> {
                       _fishNameError = '';
                     });
                   }
+
                   int? price = int.tryParse(_priceController.text.trim());
                   int? quantity = int.tryParse(_quantityController.text.trim());
                   if (price == null) {
@@ -277,7 +278,6 @@ class _AddSellPageState extends State<AddSellPage> {
                       _fishNameError.isEmpty &&
                       _priceError.isEmpty &&
                       _quantityError.isEmpty) {
-                    print(quantity);
                     _selectedDate ??= DateTime.now();
 
                     DB().addSell(
@@ -288,7 +288,14 @@ class _AddSellPageState extends State<AddSellPage> {
                       date: _selectedDate!,
                       isSmallFish: _isSmallFish,
                     );
-                    Navigator.pop(context);
+
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const HomePage(selectedIndex: 0),
+                        ),
+                        (route) => false);
                   }
                 },
                 child: const Text('Add Sell'),
