@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/database.dart';
+import '../home/home_page.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
@@ -162,7 +163,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 });
               } else {
                 DB().addExpense(_selectedName, price!, quantity!);
-                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomePage(selectedIndex: 1),
+                  ),
+                  (route) => false,
+                );
               }
             },
             child: const Text('Add Expense'),

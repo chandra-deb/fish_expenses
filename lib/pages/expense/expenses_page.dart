@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../models/expense_model.dart';
-import '../../shared/filtererModalSheet.dart';
+import '../../shared/filterer_modal_Sheet.dart';
 
 class ExpensesPageWrapper extends StatelessWidget {
   const ExpensesPageWrapper({super.key});
@@ -30,8 +30,8 @@ class ExpensesPageWrapper extends StatelessWidget {
         ],
         title: const Text('Expenses Page'),
       ),
-      body: StreamBuilder<List<Expense>>(
-        stream: db.getExpensesStream,
+      body: FutureBuilder<List<Expense>>(
+        future: db.getExpenses,
         builder: (BuildContext context, AsyncSnapshot<List<Expense>> snapshot) {
           if (snapshot.hasData) {
             List<Expense> expenses = snapshot.data!;
@@ -89,7 +89,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   List<Expense> filterByDateRange() {
-    print('Date Range Ran');
     if (selectedDateRange != null) {
       List<Expense> exps = expenses
           .where(
