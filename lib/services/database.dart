@@ -27,6 +27,7 @@ class DB {
 
   List<Expense> expenses = [];
   List<Sell> sells = [];
+  late String _masterPassword = '1234';
 
   bool sellsDataChanged = true;
   bool expensesDataChanged = true;
@@ -47,6 +48,10 @@ class DB {
     return _db;
   }
 
+  String get masterPassword {
+    return _masterPassword;
+  }
+
   Future<void> addUser(String userUid) async {
     await _collectionRef.doc(userUid).set(
         {_fishNamesField: [], _expenseNamesField: [], _buyerNamesField: []});
@@ -55,6 +60,7 @@ class DB {
   Future<UserData> getUserData() async {
     var rawData = await _userRef.get().then((value) => value.data() as Map);
     userData = UserData.fromMap(rawData);
+    _masterPassword = rawData['masterPassword'] as String;
     return userData;
     // fishNames = rawData[_fishNamesField];
     // buyerNames = rawData[_fishNamesField];
