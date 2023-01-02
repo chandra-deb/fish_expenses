@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../services/database.dart';
 
-void showNameDeleteConfirmationDialog({
+Future<bool> showNameDeleteConfirmationDialog({
   required BuildContext context,
   required String name,
   required Future<void> Function(String name) nameRemoverFunc,
-}) {
-  showDialog<String>(
+}) async {
+  var isDeleted = false;
+  return showDialog<String>(
     context: context,
     builder: (BuildContext context) {
       String enteredPassword = '';
@@ -18,12 +19,14 @@ void showNameDeleteConfirmationDialog({
           children: <Widget>[
             const Text('Enter Master Password to delete!'),
             TextField(
+              obscureText: true,
               onChanged: (value) => enteredPassword = value.trim(),
             ),
             TextButton(
               onPressed: () {
                 if (enteredPassword == DB().masterPassword) {
                   nameRemoverFunc(name);
+                  isDeleted = true;
                   SnackBar(
                     content: Text('$name deleted'),
                   );
@@ -36,5 +39,5 @@ void showNameDeleteConfirmationDialog({
         ),
       );
     },
-  );
+  ).then((_) => isDeleted);
 }
