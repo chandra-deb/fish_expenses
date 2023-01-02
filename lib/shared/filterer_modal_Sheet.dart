@@ -60,7 +60,6 @@ class FiltererModalSheet {
                       selectedNames.add('All');
                     });
                   }
-                  print(selectedNames);
                 },
                 child: selectedNames.contains(name)
                     ? Text(
@@ -88,7 +87,9 @@ class FiltererModalSheet {
                   return const Text('Something Went Wrong');
                 case ConnectionState.done:
                   var names = snapshot.data!;
-                  names.insert(0, 'All');
+                  if (!(names.contains('All'))) {
+                    names.insert(0, 'All');
+                  }
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) {
                       return _namesListView(names, setState);

@@ -31,7 +31,9 @@ class DB {
   List<Expense> expenses = [];
   List<Sell> sells = [];
   List<String> expenseNames = [];
-  bool dataChanged = true;
+  bool sellsDataChanged = true;
+  bool expensesDataChanged = true;
+  bool fishNamesDataChanged = true;
 
   DB._privateConstructor();
   static final DB _db = DB._privateConstructor();
@@ -47,20 +49,23 @@ class DB {
   }
 
 // FishNames
-  Stream<List<String>> get getFishNamesStream {
-    return _userRef.snapshots().map(
-      (event) {
-        var rawData = event.get(_fishNamesField) as List;
-        fishNames = rawData.map((e) => e.toString()).toList();
-        return fishNames;
-      },
-    );
-  }
+  // Stream<List<String>> get getFishNamesStream {
+  //   return _userRef.snapshots().map(
+  //     (event) {
+  //       var rawData = event.get(_fishNamesField) as List;
+  //       fishNames = rawData.map((e) => e.toString()).toList();
+  //       return fishNames;
+  //     },
+  //   );
+  // }
 
   Future<List<String>> get getFishNames async {
-    var rawData = await _userRef.get();
-    var rawFishNames = rawData.get(_fishNamesField) as List;
-    fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
+    if (fishNamesDataChanged) {
+      var rawData = await _userRef.get();
+      var rawFishNames = rawData.get(_fishNamesField) as List;
+      fishNames = rawFishNames.map((fishName) => fishName.toString()).toList();
+      fishNamesDataChanged = false;
+    }
     return fishNames;
   }
 
@@ -68,12 +73,14 @@ class DB {
     fishNames = await getFishNames;
     if (fishNames.contains(fishName)) return;
     fishNames.add(fishName);
+    fishNamesDataChanged = true;
     await _userRef.update({_fishNamesField: fishNames});
   }
 
   Future<void> removeFishName(String fishName) async {
     if (fishNames.contains(fishName)) {
       fishNames.remove(fishName);
+      fishNamesDataChanged = true;
       await _userRef.update({_fishNamesField: fishNames});
     }
   }
@@ -133,38 +140,18 @@ class DB {
   }
   // Buyers
 
-  var sellStream = StreamController<List<Sell>>();
-
 // Sells Start
   Future<List<Sell>> get getSells async {
-    if (dataChanged) {
+    if (sellsDataChanged) {
       var snap = await _sellsCollectionRef.get();
       sells = snap.docs.map((e) {
         return Sell.fromMap(e.data());
       }).toList();
 
       sells.sort((a, b) => b.date.compareTo(a.date));
-      dataChanged = false;
+      sellsDataChanged = false;
     }
     return sells;
-
-    // if (dataChanged) {
-    //   return _sellsCollectionRef.snapshots().map(
-    //     (element) {
-    //       sells = element.docs.map((e) {
-    //         return Sell.fromMap(e.data());
-    //       }).toList();
-    //       sells.sort((a, b) => b.date.compareTo(a.date));
-    //       sellStream.sink.add(sells);
-    //       // return sellStream.stream.asBroadcastStream();
-
-    //       // return sells;
-    //     },
-    //   );
-    // } else {
-    //   sellStream.sink.add(sells);
-    // }
-    // return sellStream.stream;
   }
 
   Future<void> addSell({
@@ -184,29 +171,30 @@ class DB {
       quantity: quantity,
       smallFish: isSmallFish,
     );
-    dataChanged = true;
+    sellsDataChanged = true;
     await _sellsCollectionRef.doc(sell.id).set(sell.toMap());
   }
 
 // Sells End
 
 // Expenses
-  Stream<List<Expense>> get getExpensesStream {
-    return _expensesCollectionRef.snapshots().map(
-      (element) {
-        expenses = element.docs.map((e) {
-          return Expense.fromMap(e.data());
-        }).toList();
-        expenses.sort((a, b) => b.dateTime.compareTo(a.dateTime));
-        return expenses;
-      },
-    );
+  Future<List<Expense>> get getExpenses async {
+    if (expensesDataChanged) {
+      var snap = await _expensesCollectionRef.get();
+      expenses = snap.docs.map((e) {
+        return Expense.fromMap(e.data());
+      }).toList();
+
+      expenses.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      expensesDataChanged = false;
+    }
+    return expenses;
   }
 
   Future<void> addExpense(
     String name,
     int price,
-    int quantity,
+    String quantity,
   ) async {
     final expense = Expense(
       id: const Uuid().v1(),
@@ -215,13 +203,8 @@ class DB {
       quantity: quantity,
       dateTime: DateTime.now(),
     );
-    await _expensesCollectionRef
-        .doc(
-          expense.id,
-        )
-        .set(
-          expense.toMap(),
-        );
+    expensesDataChanged = true;
+    await _expensesCollectionRef.doc(expense.id).set(expense.toMap());
   }
 
   Future<void> removeExpense(Expense expense) async {
