@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/buyer_model.dart';
 import '../models/expense_model.dart';
 import '../models/sell_model.dart';
 import 'auth_service.dart';
 
 const _usersCollectionName = 'users';
-const _buyersField = 'buyers';
+const _buyerNamesField = 'buyerNames';
 const _fishNamesField = 'fishNames';
 const _sellsCollectionName = 'sells';
 const _expensesCollectionName = 'expenses';
@@ -25,15 +24,18 @@ class DB {
       _userRef.collection(_expensesCollectionName);
   late final _sellsCollectionRef = _userRef.collection(_sellsCollectionName);
 
+// UserData _userData = UserData(fishNames: fishNames, expenseNames: expenseNames)
+
   List<String> fishNames = [];
-  List<Buyer> buyers = [];
   List<String> buyerNames = [];
   List<Expense> expenses = [];
   List<Sell> sells = [];
   List<String> expenseNames = [];
+
   bool sellsDataChanged = true;
   bool expensesDataChanged = true;
   bool fishNamesDataChanged = true;
+  bool buyerNamesDataChanged = true;
 
   DB._privateConstructor();
   static final DB _db = DB._privateConstructor();
@@ -43,21 +45,11 @@ class DB {
   }
 
   Future<void> addUser(String userUid) async {
-    await _collectionRef
-        .doc(userUid)
-        .set({_fishNamesField: [], _expenseNamesField: [], _buyersField: []});
+    await _collectionRef.doc(userUid).set(
+        {_fishNamesField: [], _expenseNamesField: [], _buyerNamesField: []});
   }
 
 // FishNames
-  // Stream<List<String>> get getFishNamesStream {
-  //   return _userRef.snapshots().map(
-  //     (event) {
-  //       var rawData = event.get(_fishNamesField) as List;
-  //       fishNames = rawData.map((e) => e.toString()).toList();
-  //       return fishNames;
-  //     },
-  //   );
-  // }
 
   Future<List<String>> get getFishNames async {
     if (fishNamesDataChanged) {
@@ -87,58 +79,35 @@ class DB {
 // FishNames
 
 // Buyers
-  Stream<List<Buyer>> get getBuyersStream {
-    return _userRef.snapshots().map(
-      (event) {
-        var rawBuyers = event.get(_buyersField) as List;
-        buyers = rawBuyers.map((e) => Buyer.fromMap(e)).toList();
-        return buyers;
-      },
-    );
-  }
 
   Future<List<String>> get getBuyerNames async {
-    final rawData = await _userRef.get();
-    final rawBuyers = rawData.get(_buyersField) as List;
-    buyerNames = rawBuyers.map((buyer) => Buyer.fromMap(buyer).name).toList();
+    if (buyerNamesDataChanged) {
+      final rawData = await _userRef.get();
+      final rawBuyers = rawData.get(_buyerNamesField) as List;
+      buyerNames = rawBuyers.map((buyerName) => buyerName.toString()).toList();
+      buyerNamesDataChanged = false;
+    }
     return buyerNames;
-
-    // return buyers.map((buyer) => buyer.name).toList();
   }
 
-  Future<List<Buyer>> get getBuyers async {
-    var rd = await _userRef.get();
-    var rc = rd.get(_buyersField) as List;
-    var kc = rc.map((e) => Buyer.fromMap(e)).toList();
-    return kc;
+  Future<void> addBuyerName(String buyerName) async {
+    final buyerNames = await getBuyerNames;
 
-    // userRef.snapshots().map(
-    //   (event) {
-    //     var rawData = event.get('buyers') as List;
-    //     buyers = rawData.map((e) => Buyer.fromMap(e)).toList();
-    //     return buyers;
-    //   },
-    // );
+    if (buyerNames.contains(buyerName)) return;
+    buyerNames.add(buyerName);
+    buyerNamesDataChanged = true;
+    await _userRef.update({_buyerNamesField: buyerNames});
   }
 
-  Future<void> addBuyer(Buyer buyer) async {
-    if (buyers.contains(buyer)) return;
-    buyers.add(buyer);
-    final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
-    await _userRef.update({_buyersField: updatedBuyers});
+  Future<void> removeBuyerName(String buyerName) async {
+    if (buyerNames.contains(buyerName)) {
+      buyerNames.remove(buyerName);
+      buyerNamesDataChanged = true;
+      await _userRef.update({_buyerNamesField: buyerNames});
+    }
   }
 
-  Future<void> removeBuyer(Buyer buyer) async {
-    buyers = buyers.where(
-      (byr) {
-        if (byr.name != buyer.name) return true;
-        return false;
-      },
-    ).toList();
-    final updatedBuyers = buyers.map((buyer) => buyer.toMap()).toList();
-    await _userRef.update({_buyersField: updatedBuyers});
-  }
-  // Buyers
+// Buyers
 
 // Sells Start
   Future<List<Sell>> get getSells async {
