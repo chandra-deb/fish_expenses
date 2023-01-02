@@ -146,15 +146,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
           ElevatedButton(
             onPressed: () {
               int? price = int.tryParse(_priceController.text.trim());
-              int? quantity = int.tryParse(_quantityController.text.trim());
+              var quantity = _quantityController.text.trim();
               if (price == null) {
                 setState(() {
                   _priceError = 'Only Number Allowed';
                 });
               }
-              if (quantity == null) {
+              if (quantity.isEmpty) {
                 setState(() {
-                  _quantityError = 'Only Number Allowed';
+                  _quantityError = 'Field Can not be empty';
                 });
               }
               if (_selectedName.isEmpty) {
@@ -162,7 +162,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   _newNameError = 'Please Select a name';
                 });
               } else {
-                DB().addExpense(_selectedName, price!, quantity!);
+                DB().addExpense(_selectedName, price!, quantity);
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(

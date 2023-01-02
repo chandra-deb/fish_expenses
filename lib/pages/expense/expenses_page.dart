@@ -135,7 +135,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
               children: [
                 Text('${expense.name} Name'),
                 Text('${expense.price} Taka'),
-                Text('${expense.quantity} kg'),
+                Text(expense.quantity),
               ],
             ),
           ),
