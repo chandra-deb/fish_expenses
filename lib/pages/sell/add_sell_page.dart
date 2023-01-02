@@ -60,12 +60,20 @@ class _AddSellPageState extends State<AddSellPage> {
                               });
                               Navigator.pop(context);
                             }),
-                            onLongPress: () {
-                              showNameDeleteConfirmationDialog(
+                            onLongPress: () async {
+                              var isDeleted =
+                                  await showNameDeleteConfirmationDialog(
                                 context: context,
                                 name: name,
                                 nameRemoverFunc: DB().removeBuyerName,
                               );
+                              if (isDeleted) {
+                                if (name == _selectedBuyerName) {
+                                  setState(() {
+                                    _selectedBuyerName = '';
+                                  });
+                                }
+                              }
                             },
                             child: Text(name),
                           ),
@@ -110,11 +118,20 @@ class _AddSellPageState extends State<AddSellPage> {
                               });
                               Navigator.pop(context);
                             }),
-                            onLongPress: () {
-                              showNameDeleteConfirmationDialog(
-                                  context: context,
-                                  name: name,
-                                  nameRemoverFunc: DB().removeFishName);
+                            onLongPress: () async {
+                              var isDeleted =
+                                  await showNameDeleteConfirmationDialog(
+                                context: context,
+                                name: name,
+                                nameRemoverFunc: DB().removeFishName,
+                              );
+                              if (isDeleted) {
+                                if (name == _selectedFishName) {
+                                  setState(() {
+                                    _selectedFishName = '';
+                                  });
+                                }
+                              }
                             },
                             child: Text(name),
                           ),
