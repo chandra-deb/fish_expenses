@@ -7,7 +7,7 @@ class Expense {
   final String id;
   final String name;
   final int price;
-  final int quantity;
+  final String quantity;
   final DateTime dateTime;
   const Expense({
     required this.id,
@@ -33,7 +33,7 @@ class Expense {
       id: map['id'] as String,
       name: map['name'] as String,
       price: map['price'] as int,
-      quantity: map['quantity'] as int,
+      quantity: map['quantity'] as String,
       dateTime: timeStamp.toDate(),
     );
   }
