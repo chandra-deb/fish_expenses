@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/database.dart';
+import '../../shared/name_delete_confirmation.dart';
 import '../home/home_page.dart';
 
 class AddExpensePage extends StatefulWidget {
@@ -53,7 +54,21 @@ class _AddExpensePageState extends State<AddExpensePage> {
                               });
                               Navigator.pop(context);
                             }),
-                            onLongPress: () {},
+                            onLongPress: () async {
+                              var isDeleted =
+                                  await showNameDeleteConfirmationDialog(
+                                context: context,
+                                name: name,
+                                nameRemoverFunc: DB().removeExpenseName,
+                              );
+                              if (isDeleted) {
+                                if (name == _selectedName) {
+                                  setState(() {
+                                    _selectedName = '';
+                                  });
+                                }
+                              }
+                            },
                             child: Text(name),
                           ),
                         )
