@@ -1,9 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:fish_expenses/pages/expense/add_expense_page.dart';
+import 'package:fish_expenses/pages/home/home_page.dart';
 import 'package:fish_expenses/services/auth_service.dart';
 import 'package:fish_expenses/services/database.dart';
 import 'package:fish_expenses/shared/date_range_picker.dart';
+import 'package:fish_expenses/shared/name_delete_confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -129,7 +131,23 @@ class _ExpensesPageState extends State<ExpensesPage> {
     final expenses = filteredExpenses()
         .map(
           (expense) => TextButton(
-            onPressed: () async {},
+            onPressed: () {},
+            onLongPress: () async {
+              bool isDeleted = await showNameDeleteConfirmationDialog(
+                context: context,
+                name: expense.id,
+                nameRemoverFunc: DB().removeExpense,
+              );
+              if (isDeleted) {
+                // ignore: use_build_context_synchronously
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomePage(selectedIndex: 1),
+                    ),
+                    (route) => false);
+              }
+            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
