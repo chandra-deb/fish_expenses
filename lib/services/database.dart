@@ -27,7 +27,7 @@ class DB {
 
   List<Expense> expenses = [];
   List<Sell> sells = [];
-  late String _masterPassword = '1234';
+  late String _masterPassword;
 
   bool sellsDataChanged = true;
   bool expensesDataChanged = true;
@@ -53,8 +53,12 @@ class DB {
   }
 
   Future<void> addUser(String userUid) async {
-    await _collectionRef.doc(userUid).set(
-        {_fishNamesField: [], _expenseNamesField: [], _buyerNamesField: []});
+    await _collectionRef.doc(userUid).set({
+      _fishNamesField: [],
+      _expenseNamesField: [],
+      _buyerNamesField: [],
+      'masterPassword': ''
+    });
   }
 
   Future<UserData> getUserData() async {
