@@ -141,6 +141,10 @@ class DB {
 
 // Sells Start
   Future<List<Sell>> get getSells async {
+    if (userDataChanged) {
+      await getUserData();
+      userDataChanged = false;
+    }
     if (sellsDataChanged) {
       var snap = await _sellsCollectionRef.get();
       sells = snap.docs.map((e) {
