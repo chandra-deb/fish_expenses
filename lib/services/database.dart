@@ -178,6 +178,18 @@ class DB {
     await _sellsCollectionRef.doc(sell.id).set(sell.toMap());
   }
 
+  Future<void> removeSell(String id) async {
+    sellsDataChanged = true;
+    await _sellsCollectionRef
+        .doc(
+          id,
+        )
+        .delete()
+        .whenComplete(
+          () => print('Delete $id'),
+        );
+  }
+
 // Sells End
 
 // Expenses
