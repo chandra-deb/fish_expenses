@@ -222,14 +222,15 @@ class DB {
     await _expensesCollectionRef.doc(expense.id).set(expense.toMap());
   }
 
-  Future<void> removeExpense(Expense expense) async {
+  Future<void> removeExpense(String id) async {
+    expensesDataChanged = true;
     await _expensesCollectionRef
         .doc(
-          expense.id,
+          id,
         )
         .delete()
         .whenComplete(
-          () => print('Delete ${expense.id}'),
+          () => print('Delete $id'),
         );
   }
 
