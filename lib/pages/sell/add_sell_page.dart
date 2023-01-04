@@ -48,6 +48,7 @@ class _AddSellPageState extends State<AddSellPage> {
                 return const Text('Something Went Wrong');
               case ConnectionState.done:
                 var buyerNames = snapshot.data!;
+                buyerNames.remove('All');
                 return ListView(
                   children: [
                     ...buyerNames
@@ -106,6 +107,7 @@ class _AddSellPageState extends State<AddSellPage> {
                 return const Text('Something Went Wrong');
               case ConnectionState.done:
                 var fishNames = snapshot.data!;
+                fishNames.remove('All');
                 return ListView(
                   children: [
                     ...fishNames
@@ -158,7 +160,7 @@ class _AddSellPageState extends State<AddSellPage> {
       appBar: AppBar(title: const Text('Add New Sell')),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -184,11 +186,13 @@ class _AddSellPageState extends State<AddSellPage> {
                         ? Text(_selectedBuyerName)
                         : Text(
                             _buyerNameError.isEmpty
-                                ? 'Select A Buyer Name'
+                                ? 'Select A Buyer'
                                 : _buyerNameError,
                           ),
                   ),
+                  const SizedBox(width: 10),
                   const Text('or'),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
                       keyboardType: TextInputType.name,
@@ -230,11 +234,13 @@ class _AddSellPageState extends State<AddSellPage> {
                         ? Text(_selectedFishName)
                         : Text(
                             _fishNameError.isEmpty
-                                ? 'Select A Fish Name'
+                                ? 'Select A Fish'
                                 : _fishNameError,
                           ),
                   ),
+                  const SizedBox(width: 10),
                   const Text('or'),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
                       keyboardType: TextInputType.name,
