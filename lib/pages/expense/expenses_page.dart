@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../models/expense_model.dart';
-import '../../shared/filterer_modal_Sheet.dart';
+import '../../shared/filterer_modal_sheet.dart';
 
 class ExpensesPageWrapper extends StatelessWidget {
   const ExpensesPageWrapper({super.key});
@@ -151,8 +151,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('${expense.name} Name'),
-                Text('${expense.price} Taka'),
+                Text(expense.name),
+                Text('${expense.price} Tk'),
                 Text(expense.quantity),
               ],
             ),
@@ -214,7 +214,10 @@ class _ExpensesPageState extends State<ExpensesPage> {
               ],
             ),
           ),
-          Text('All Price ${expenseAddAllPrice()} taka')
+          Text(
+            'All Price ${expenseAddAllPrice()} Tk',
+            style: const TextStyle(fontSize: 16),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(

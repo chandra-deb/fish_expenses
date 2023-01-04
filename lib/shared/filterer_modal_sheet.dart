@@ -26,6 +26,7 @@ class FiltererModalSheet {
                 onPressed: () {
                   // setState(
                   //   () {
+
                   if (selectedNames.contains(name)) {
                     if (!(selectedNames.length == 1 &&
                         selectedNames.contains('All'))) {
@@ -54,6 +55,11 @@ class FiltererModalSheet {
                   }
                   //   },
                   // );
+                  if (selectedNames.isEmpty) {
+                    setState(() {
+                      selectedNames.add('All');
+                    });
+                  }
                 },
                 child: selectedNames.contains(name)
                     ? Text(
@@ -81,7 +87,10 @@ class FiltererModalSheet {
                   return const Text('Something Went Wrong');
                 case ConnectionState.done:
                   var names = snapshot.data!;
-                  names.insert(0, 'All');
+                  // print(names);
+                  if (!(names.contains('All'))) {
+                    names.insert(0, 'All');
+                  }
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) {
                       return _namesListView(names, setState);
@@ -95,9 +104,11 @@ class FiltererModalSheet {
             });
       },
     ).then((_) {
-      if (selectedNames.contains('All')) {
-        selectedNames.remove('All');
-      }
+      // print(selectedNames);
+      selectedNames.removeWhere(
+        (element) => element == 'All',
+      );
+      // selectedNames.remove('All');
       return selectedNames;
     });
   }

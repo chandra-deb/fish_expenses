@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../services/auth_service.dart';
-import '../buyers/buyers_page.dart';
 import '../expense/expenses_page.dart';
 import '../login/login_page.dart';
 import '../sell/sells_page.dart';
@@ -28,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     SellsPageWrapper(),
     ExpensesPageWrapper(),
-    BuyersPage(),
+    // BuyersPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -64,10 +63,6 @@ class _HomePageState extends State<HomePage> {
                   BottomNavigationBarItem(
                     icon: Icon(FontAwesomeIcons.moneyCheck),
                     label: 'Expenses',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(FontAwesomeIcons.peopleGroup),
-                    label: 'Buyers',
                   ),
                 ],
                 currentIndex: _selectedIndex,

@@ -29,13 +29,13 @@ class DB {
   List<Sell> sells = [];
   late String _masterPassword;
 
-  bool sellsDataChanged = true;
-  bool expensesDataChanged = true;
-  bool fishNamesDataChanged = true;
-  bool buyerNamesDataChanged = true;
-  bool userDataChanged = true;
+  bool _sellsDataChanged = true;
+  bool _expensesDataChanged = true;
+  // bool _fishNamesDataChanged = true;
+  // bool buyerNamesDataChanged = true;
+  bool _userDataChanged = true;
 
-  UserData userData = UserData(
+  UserData _userData = UserData(
     fishNames: [],
     expenseNames: [],
     buyerNames: [],
@@ -63,9 +63,9 @@ class DB {
 
   Future<UserData> getUserData() async {
     var rawData = await _userRef.get().then((value) => value.data() as Map);
-    userData = UserData.fromMap(rawData);
+    _userData = UserData.fromMap(rawData);
     _masterPassword = rawData['masterPassword'] as String;
-    return userData;
+    return _userData;
     // fishNames = rawData[_fishNamesField];
     // buyerNames = rawData[_fishNamesField];
     // expenseNames = rawData[_expenseNamesField];
@@ -79,30 +79,30 @@ class DB {
 // FishNames
 
   Future<List<String>> get getFishNames async {
-    if (userDataChanged) {
+    if (_userDataChanged) {
       await getUserData();
-      userDataChanged = false;
+      _userDataChanged = false;
     }
 
-    return userData.fishNames;
+    return _userData.fishNames;
   }
 
   Future<void> addFishName(String fishName) async {
     var fishNames = await getFishNames;
     if (fishNames.contains(fishName)) return;
     fishNames.add(fishName);
-    userData = userData.copyWith(fishNames: fishNames);
-    userDataChanged = true;
-    await _userRef.update({_fishNamesField: userData.fishNames});
+    _userData = _userData.copyWith(fishNames: fishNames);
+    _userDataChanged = true;
+    await _userRef.update({_fishNamesField: _userData.fishNames});
   }
 
   Future<void> removeFishName(String fishName) async {
     var fishNames = await getFishNames;
     if (fishNames.contains(fishName)) {
       fishNames.remove(fishName);
-      userData = userData.copyWith(fishNames: fishNames);
-      userDataChanged = true;
-      await _userRef.update({_fishNamesField: userData.fishNames});
+      _userData = _userData.copyWith(fishNames: fishNames);
+      _userDataChanged = true;
+      await _userRef.update({_fishNamesField: _userData.fishNames});
     }
   }
 // FishNames
@@ -110,11 +110,11 @@ class DB {
 // Buyers
 
   Future<List<String>> get getBuyerNames async {
-    if (userDataChanged) {
+    if (_userDataChanged) {
       await getUserData();
-      userDataChanged = false;
+      _userDataChanged = false;
     }
-    return userData.buyerNames;
+    return _userData.buyerNames;
   }
 
   Future<void> addBuyerName(String buyerName) async {
@@ -122,18 +122,18 @@ class DB {
 
     if (buyerNames.contains(buyerName)) return;
     buyerNames.add(buyerName);
-    userData = userData.copyWith(buyerNames: buyerNames);
-    userDataChanged = true;
-    await _userRef.update({_buyerNamesField: userData.buyerNames});
+    _userData = _userData.copyWith(buyerNames: buyerNames);
+    _userDataChanged = true;
+    await _userRef.update({_buyerNamesField: _userData.buyerNames});
   }
 
   Future<void> removeBuyerName(String buyerName) async {
     final buyerNames = await getBuyerNames;
     if (buyerNames.contains(buyerName)) {
       buyerNames.remove(buyerName);
-      userData = userData.copyWith(buyerNames: buyerNames);
-      userDataChanged = true;
-      await _userRef.update({_buyerNamesField: userData.buyerNames});
+      _userData = _userData.copyWith(buyerNames: buyerNames);
+      _userDataChanged = true;
+      await _userRef.update({_buyerNamesField: _userData.buyerNames});
     }
   }
 
@@ -141,18 +141,18 @@ class DB {
 
 // Sells Start
   Future<List<Sell>> get getSells async {
-    if (userDataChanged) {
+    if (_userDataChanged) {
       await getUserData();
-      userDataChanged = false;
+      _userDataChanged = false;
     }
-    if (sellsDataChanged) {
+    if (_sellsDataChanged) {
       var snap = await _sellsCollectionRef.get();
       sells = snap.docs.map((e) {
         return Sell.fromMap(e.data());
       }).toList();
 
       sells.sort((a, b) => b.date.compareTo(a.date));
-      sellsDataChanged = false;
+      _sellsDataChanged = false;
     }
     return sells;
   }
@@ -174,34 +174,31 @@ class DB {
       quantity: quantity,
       smallFish: isSmallFish,
     );
-    sellsDataChanged = true;
+    _sellsDataChanged = true;
     await _sellsCollectionRef.doc(sell.id).set(sell.toMap());
   }
 
   Future<void> removeSell(String id) async {
-    sellsDataChanged = true;
+    _sellsDataChanged = true;
     await _sellsCollectionRef
         .doc(
           id,
         )
-        .delete()
-        .whenComplete(
-          () => print('Delete $id'),
-        );
+        .delete();
   }
 
 // Sells End
 
 // Expenses
   Future<List<Expense>> get getExpenses async {
-    if (expensesDataChanged) {
+    if (_expensesDataChanged) {
       var snap = await _expensesCollectionRef.get();
       expenses = snap.docs.map((e) {
         return Expense.fromMap(e.data());
       }).toList();
 
       expenses.sort((a, b) => b.dateTime.compareTo(a.dateTime));
-      expensesDataChanged = false;
+      _expensesDataChanged = false;
     }
     return expenses;
   }
@@ -218,48 +215,45 @@ class DB {
       quantity: quantity,
       dateTime: DateTime.now(),
     );
-    expensesDataChanged = true;
+    _expensesDataChanged = true;
     await _expensesCollectionRef.doc(expense.id).set(expense.toMap());
   }
 
   Future<void> removeExpense(String id) async {
-    expensesDataChanged = true;
+    _expensesDataChanged = true;
     await _expensesCollectionRef
         .doc(
           id,
         )
-        .delete()
-        .whenComplete(
-          () => print('Delete $id'),
-        );
+        .delete();
   }
 
 // ExpenseNames
   Future<List<String>> get getExpenseNames async {
-    if (userDataChanged) {
+    if (_userDataChanged) {
       await getUserData();
-      userDataChanged = false;
+      _userDataChanged = false;
     }
 
-    return userData.expenseNames;
+    return _userData.expenseNames;
   }
 
   Future<void> addExpenseName(String expenseName) async {
     final expenseNames = await getExpenseNames;
     if (expenseNames.contains(expenseName)) return;
     expenseNames.add(expenseName);
-    userData = userData.copyWith(expenseNames: expenseNames);
-    userDataChanged = true;
-    await _userRef.update({_expenseNamesField: userData.expenseNames});
+    _userData = _userData.copyWith(expenseNames: expenseNames);
+    _userDataChanged = true;
+    await _userRef.update({_expenseNamesField: _userData.expenseNames});
   }
 
   Future<void> removeExpenseName(String expenseName) async {
     final expenseNames = await getExpenseNames;
     if (expenseNames.contains(expenseName)) {
       expenseNames.remove(expenseName);
-      userData = userData.copyWith(expenseNames: expenseNames);
-      userDataChanged = true;
-      await _userRef.update({_expenseNamesField: userData.expenseNames});
+      _userData = _userData.copyWith(expenseNames: expenseNames);
+      _userDataChanged = true;
+      await _userRef.update({_expenseNamesField: _userData.expenseNames});
     }
   }
 // ExpenseNames

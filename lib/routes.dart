@@ -1,7 +1,15 @@
-import 'package:fish_expenses/pages/home/home_page.dart';
-import 'package:fish_expenses/pages/login/login_page.dart';
+import 'pages/expense/add_expense_page.dart';
+import 'pages/home/home_page.dart';
+import 'pages/login/login_page.dart';
+import 'pages/sell/add_sell_page.dart';
+import 'pages/sell/sells_page.dart';
 
 final routes = {
-  HomePage.routeName: (context) => const HomePage(),
+  '/': (context) => const HomePage(
+        selectedIndex: 0,
+      ),
   LoginPage.routeName: (context) => const LoginPage(),
+  SellsPageWrapper.routeName: (context) => const SellsPageWrapper(),
+  AddSellPage.routeName: (context) => const AddSellPage(),
+  AddExpensePage.routeName: (context) => const AddExpensePage(),
 };

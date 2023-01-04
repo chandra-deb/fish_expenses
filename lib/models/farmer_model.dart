@@ -2,11 +2,10 @@
 import 'dart:convert';
 
 import 'package:fish_expenses/models/buyer_model.dart';
-import 'package:fish_expenses/models/expense_model.dart';
 import 'package:fish_expenses/models/sell_model.dart';
 
 class Farmer {
-  final List<Expense> expenses;
+  final List<Sell> expenses;
   final List<Sell> sells;
   final List<Buyer> buyers;
   final List<String> fishNames;
@@ -28,9 +27,9 @@ class Farmer {
 
   factory Farmer.fromMap(Map<String, dynamic> map) {
     return Farmer(
-      expenses: List<Expense>.from(
-        (map['expenses'] as List<int>).map<Expense>(
-          (x) => Expense.fromMap(x as Map<String, dynamic>),
+      expenses: List<Sell>.from(
+        (map['expenses'] as List<int>).map<Sell>(
+          (x) => Sell.fromMap(x as Map<String, dynamic>),
         ),
       ),
       sells: List<Sell>.from(

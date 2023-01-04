@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../extensions/string_capitalize.dart';
 import '../../models/sell_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/database.dart';
 import '../../shared/date_range_picker.dart';
-import '../../shared/filterer_modal_Sheet.dart';
+import '../../shared/filterer_modal_sheet.dart';
+import '../../shared/name_delete_confirmation.dart';
+import '../home/home_page.dart';
 import 'add_sell_page.dart';
 
 enum NameOf {
@@ -156,9 +157,9 @@ class _SellsPageState extends State<SellsPage> {
   FishSize _selectedFishSize = FishSize.all;
   List<bool> _selectedFishSizeInBoolList = <bool>[true, false, false];
   final List<Widget> fishSizes = <Widget>[
-    Text(FishSize.all.name.toCapitalize()),
-    Text(FishSize.large.name.toCapitalize()),
-    Text(FishSize.small.name.toCapitalize()),
+    const Text('All'),
+    const Text('রেনু'),
+    const Text('বড়'),
   ];
 
   List<Sell> filterSellsByFishSize() {
@@ -208,6 +209,22 @@ class _SellsPageState extends State<SellsPage> {
             color: Colors.green.shade100,
             child: TextButton(
               onPressed: () async {},
+              onLongPress: () async {
+                bool isDeleted = await showNameDeleteConfirmationDialog(
+                  context: context,
+                  name: sell.id,
+                  nameRemoverFunc: DB().removeSell,
+                );
+                if (isDeleted) {
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomePage(selectedIndex: 0),
+                      ),
+                      (route) => false);
+                }
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -216,7 +233,6 @@ class _SellsPageState extends State<SellsPage> {
                   Text('${sell.quantity} Kg'),
                   Text('${sell.price} Tk'),
                   Text(sell.date.toString().split(' ')[0]),
-                  Text(sell.smallFish == true ? 'Small' : 'Large'),
                 ],
               ),
             ),
@@ -236,6 +252,7 @@ class _SellsPageState extends State<SellsPage> {
             namesFuture: DB().getBuyerNames,
             selectedNames: _selectedBuyerNames,
           ).showFiltererSheet();
+
           setState(() {
             _selectedBuyerNames = selectedNames;
           });
@@ -278,7 +295,7 @@ class _SellsPageState extends State<SellsPage> {
       body: Column(
         children: [
           SizedBox(
-            height: 400,
+            height: MediaQuery.of(context).size.height - 200,
             child: ListView(
               children: [
                 Container(
@@ -330,8 +347,15 @@ class _SellsPageState extends State<SellsPage> {
               ],
             ),
           ),
-          Text('Price ${sellAddAllPrice()} taka'),
-          Text('Quantity ${sellAddAllQuantity()} kg'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Price ${sellAddAllPrice()} taka',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+          Text(
+              'Quantity ${sellAddAllQuantity()} kg or ${sellAddAllQuantity() / 40} Mon'),
         ],
       ),
       floatingActionButton: FloatingActionButton(
