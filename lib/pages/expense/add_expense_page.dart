@@ -164,7 +164,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     errorText:
                         _quantityError.isNotEmpty ? _quantityError : null),
                 controller: _quantityController,
-                keyboardType: TextInputType.number,
               ),
               ElevatedButton(
                 onPressed: () {
