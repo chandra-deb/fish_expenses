@@ -158,8 +158,8 @@ class _SellsPageState extends State<SellsPage> {
   List<bool> _selectedFishSizeInBoolList = <bool>[true, false, false];
   final List<Widget> fishSizes = <Widget>[
     const Text('All'),
-    const Text('রেনু'),
     const Text('বড়'),
+    const Text('রেনু'),
   ];
 
   List<Sell> filterSellsByFishSize() {
