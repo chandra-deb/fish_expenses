@@ -341,7 +341,8 @@ class _AddSellPageState extends State<AddSellPage> {
                   }
 
                   int? price = int.tryParse(_priceController.text.trim());
-                  int? quantity = int.tryParse(_quantityController.text.trim());
+                  double? quantity =
+                      double.tryParse(_quantityController.text.trim());
                   if (price == null) {
                     setState(() {
                       _priceError = 'Only Number Allowed';

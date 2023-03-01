@@ -160,7 +160,7 @@ class DB {
   Future<void> addSell({
     required String buyerName,
     required String fishName,
-    required int quantity,
+    required double quantity,
     required int price,
     required DateTime date,
     required bool isSmallFish,
@@ -257,5 +257,4 @@ class DB {
     }
   }
 // ExpenseNames
-
 }

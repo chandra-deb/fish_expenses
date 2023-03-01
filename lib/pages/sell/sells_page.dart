@@ -193,8 +193,8 @@ class _SellsPageState extends State<SellsPage> {
     return allPrice;
   }
 
-  int sellAddAllQuantity() {
-    int allQuantity = 0;
+  double sellAddAllQuantity() {
+    double allQuantity = 0;
     for (var sell in sells) {
       allQuantity += sell.quantity;
     }
@@ -355,7 +355,7 @@ class _SellsPageState extends State<SellsPage> {
             ),
           ),
           Text(
-              'Quantity ${sellAddAllQuantity()} kg or ${sellAddAllQuantity() / 40} Mon'),
+              'Quantity ${sellAddAllQuantity().toStringAsFixed(2)} kg or ${(sellAddAllQuantity() / 40).toStringAsFixed(2)} Mon'),
         ],
       ),
       floatingActionButton: FloatingActionButton(
